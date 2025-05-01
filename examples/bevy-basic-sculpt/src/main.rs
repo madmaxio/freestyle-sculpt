@@ -1,0 +1,45 @@
+mod resources;
+mod systems;
+
+use crate::resources::*;
+use crate::systems::*;
+
+use bevy::color::palettes::css::{BLACK, WHITE};
+use bevy::input::common_conditions::{input_just_pressed, input_just_released, input_pressed};
+use bevy::prelude::*;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_panorbit_camera::PanOrbitCameraPlugin;
+use freestyle_sculpt::deformation::*;
+
+fn main() {
+    App::new()
+        .insert_resource(ClearColor(BLACK.into()))
+        .insert_resource(AmbientLight {
+            color: WHITE.into(),
+            brightness: 0.6,
+            affects_lightmapped_meshes: true,
+        })
+        .insert_resource(SculptParams::new(1.0))
+        .insert_non_send_resource(AvailableDeformations::new(vec![
+            Box::new(TranslateDeformation::default()),
+            Box::new(SmoothDeformation::default()),
+        ]))
+        .init_resource::<CurrentDeformation>()
+        .add_plugins((
+            DefaultPlugins,
+            MeshPickingPlugin,
+            PanOrbitCameraPlugin,
+            // WorldInspectorPlugin::new(),
+        ))
+        .add_systems(Startup, setup)
+        .add_systems(
+            Update,
+            (
+                handle_mouse.run_if(
+                    input_pressed(MouseButton::Left).or(input_just_released(MouseButton::Left)),
+                ),
+                cycle_deformation_mode.run_if(input_just_pressed(KeyCode::Space)),
+            ),
+        )
+        .run();
+}

@@ -1,0 +1,92 @@
+use glam::Vec3;
+use parry3d::{math::Point, query::PointQueryWithLocation};
+
+use crate::{
+    meshgraph::{MeshGraph, Selection},
+    ray::FaceIntersection,
+    selectors::MeshSelector,
+};
+
+use super::DeformationField;
+
+pub struct TranslateDeformation {
+    selection: Selection,
+    weight_callback: Box<dyn Fn(Vec3) -> f32>,
+    translation: Vec3,
+    point: Vec3,
+}
+
+impl Default for TranslateDeformation {
+    fn default() -> Self {
+        Self {
+            selection: Selection::default(),
+            weight_callback: Box::new(|_| 1.0),
+            translation: Vec3::ZERO,
+            point: Vec3::ZERO,
+        }
+    }
+}
+
+impl DeformationField for TranslateDeformation {
+    fn on_pointer_down(
+        &mut self,
+        mesh_graph: &MeshGraph,
+        selector: &dyn MeshSelector,
+        face_intersection: FaceIntersection,
+    ) {
+        (self.selection, self.weight_callback) =
+            selector.select(mesh_graph, face_intersection.point, face_intersection.face);
+
+        self.point = face_intersection.point;
+    }
+
+    fn on_pointer_move(
+        &mut self,
+        mesh_graph: &MeshGraph,
+        selector: &dyn MeshSelector,
+        mouse_translation: Vec3,
+        _face_intersection: Option<FaceIntersection>,
+    ) -> bool {
+        self.translation = mouse_translation;
+
+        self.point += mouse_translation;
+
+        let (_, (face, _)) = mesh_graph.project_local_point_and_get_location(
+            &Point::new(self.point.x, self.point.y, self.point.z),
+            true,
+        );
+
+        (self.selection, self.weight_callback) = selector.select(mesh_graph, self.point, face);
+
+        true
+    }
+
+    #[inline(always)]
+    fn max_movement_squared(&self, _mesh_graph: &MeshGraph, strength: f32) -> f32 {
+        self.translation.length_squared() * strength
+    }
+
+    #[inline(always)]
+    fn vertex_movement(
+        &self,
+        _vertex: crate::meshgraph::VertexId,
+        _mesh_graph: &crate::meshgraph::MeshGraph,
+    ) -> glam::Vec3 {
+        self.translation
+    }
+
+    #[inline(always)]
+    fn selection(&self) -> &Selection {
+        &self.selection
+    }
+
+    #[inline(always)]
+    fn selection_mut(&mut self) -> &mut Selection {
+        &mut self.selection
+    }
+
+    #[inline(always)]
+    fn weight_callback(&self) -> &dyn Fn(Vec3) -> f32 {
+        self.weight_callback.as_ref()
+    }
+}
