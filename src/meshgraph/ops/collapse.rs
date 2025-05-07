@@ -1,4 +1,5 @@
 use hashbrown::{HashMap, HashSet};
+use itertools::Itertools;
 
 use crate::meshgraph::{FaceId, HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
 
@@ -25,7 +26,7 @@ impl MeshGraph {
             }
         }
 
-        let mut halfedges_to_disolve = dedup_halfedges
+        let mut halfedges_to_collapse = dedup_halfedges
             .into_iter()
             .filter_map(|he| {
                 let len = self.halfedges[he].length_squared(self);
@@ -33,11 +34,11 @@ impl MeshGraph {
             })
             .collect::<HashMap<_, _>>();
 
-        while !halfedges_to_disolve.is_empty() {
+        while !halfedges_to_collapse.is_empty() {
             let mut min_len = f32::MAX;
             let mut min_he = HalfedgeId::default();
 
-            for (&he, &len) in &halfedges_to_disolve {
+            for (&he, &len) in &halfedges_to_collapse {
                 if len < min_len {
                     min_len = len;
                     min_he = he;
@@ -46,7 +47,7 @@ impl MeshGraph {
 
             let start_vertex = self.halfedges[min_he].start_vertex(self);
 
-            let (vert, halfedges, faces) = self.collapse_edge(min_he);
+            let (verts, halfedges, faces) = self.collapse_edge(min_he);
 
             #[cfg(feature = "rerun")]
             {
@@ -62,12 +63,14 @@ impl MeshGraph {
                 self.log_rerun();
             }
 
-            halfedges_to_disolve.remove(&min_he);
+            halfedges_to_collapse.remove(&min_he);
 
-            selection.remove(vert);
+            for vert in verts {
+                selection.remove(vert);
+            }
             for halfedge in halfedges {
                 selection.remove(halfedge);
-                halfedges_to_disolve.remove(&halfedge);
+                halfedges_to_collapse.remove(&halfedge);
             }
             for face in faces {
                 selection.remove(face);
@@ -79,13 +82,13 @@ impl MeshGraph {
                 let len = halfedge.length_squared(self);
 
                 if len < min_length_squared {
-                    halfedges_to_disolve.insert(halfedge_id, len);
+                    halfedges_to_collapse.insert(halfedge_id, len);
                 } else {
-                    halfedges_to_disolve.remove(&halfedge_id);
+                    halfedges_to_collapse.remove(&halfedge_id);
                 }
 
                 if let Some(twin) = halfedge.twin {
-                    halfedges_to_disolve.remove(&twin);
+                    halfedges_to_collapse.remove(&twin);
                 }
 
                 if let Some(face) = halfedge.face {
@@ -101,13 +104,15 @@ impl MeshGraph {
         }
     }
 
-    /// Disolve an edge in the mesh graph. This moves the start vertex of the edge to the center of the edge
+    /// Disolve an edge in the mesh graph.
+    ///
+    /// This moves the start vertex of the edge to the center of the edge
     /// and removes the end vertex and the adjacent and opposite faces.
     /// Returns the vertex, halfedges and faces that were removed.
     pub fn collapse_edge(
         &mut self,
         halfedge_id: HalfedgeId,
-    ) -> (VertexId, Vec<HalfedgeId>, Vec<FaceId>) {
+    ) -> (Vec<VertexId>, Vec<HalfedgeId>, Vec<FaceId>) {
         #[cfg(feature = "rerun")]
         {
             self.log_he_rerun("disolve/he", halfedge_id);
@@ -177,7 +182,33 @@ impl MeshGraph {
             );
         }
 
-        (end_vert, removed_halfedges, removed_faces)
+        let mut removed_vertices = vec![end_vert];
+
+        // Remove flaps (= faces that share all their vertices)
+        let mut face_tuples: Vec<_> = self.vertices[start_vert]
+            .faces(self)
+            .into_iter()
+            .circular_tuple_windows()
+            .collect();
+
+        while let Some((face_id1, face_id2)) = face_tuples.pop() {
+            if self.faces_share_all_vertices(face_id1, face_id2) {
+                let (vs, hes) = self.delete_face(face_id1);
+                removed_vertices.extend(vs);
+                removed_halfedges.extend(hes);
+                removed_faces.push(face_id1);
+
+                let (vs, hes) = self.delete_face(face_id2);
+                removed_vertices.extend(vs);
+                removed_halfedges.extend(hes);
+                removed_faces.push(face_id2);
+
+                // one of the faces in the next tuple was removed, so we need to remove it.
+                face_tuples.pop();
+            }
+        }
+
+        (removed_vertices, removed_halfedges, removed_faces)
     }
 
     /// Remove a halfedge face and re-connecting the adjacent halfedges.

@@ -1,6 +1,6 @@
 mod cleanup;
-// mod delete;
 mod collapse;
+mod delete;
 mod insert;
 mod query;
 mod subdivide;

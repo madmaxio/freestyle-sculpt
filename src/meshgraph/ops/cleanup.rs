@@ -1,7 +1,7 @@
 use crate::meshgraph::{FaceId, HalfedgeId, MeshGraph, VertexId};
 
 impl MeshGraph {
-    /// Test if two faces have at least one edge in common.
+    /// Test if two faces have at least one halfedge in common.
     pub fn faces_share_edge(&self, face_id1: FaceId, face_id2: FaceId) -> bool {
         let face1 = self.faces[face_id1];
         let face2 = self.faces[face_id2];
@@ -32,10 +32,12 @@ impl MeshGraph {
         let face1 = self.faces[face_id1];
         let face2 = self.faces[face_id2];
 
+        let face2_vertices = face2.vertices(self);
+
         'outer: for vertex_id1 in face1.vertices(self) {
             let pos1 = self.positions[vertex_id1];
 
-            for vertex_id2 in face2.vertices(self) {
+            for &vertex_id2 in &face2_vertices {
                 let pos2 = self.positions[vertex_id2];
 
                 if pos1 == pos2 {
@@ -63,8 +65,6 @@ impl MeshGraph {
 
         let start2 = self.positions[edge2.start_vertex(self)];
         let end2 = self.positions[edge2.end_vertex];
-
-        // TODO : Also check if the halfedges are the same but in opposite direction?
 
         start1 == start2 && end1 == end2
     }
