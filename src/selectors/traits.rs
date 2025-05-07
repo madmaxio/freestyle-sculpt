@@ -8,5 +8,10 @@ pub trait MeshSelector {
         mesh_graph: &MeshGraph,
         input_pos: Vec3,
         input_face: Face,
-    ) -> (Selection, Box<dyn Fn(Vec3) -> f32>);
+    ) -> WeightedSelection;
+}
+
+pub struct WeightedSelection {
+    pub selection: Selection,
+    pub get_weight: Box<dyn Fn(Vec3) -> f32>,
 }

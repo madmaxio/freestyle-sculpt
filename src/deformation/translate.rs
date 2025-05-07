@@ -4,7 +4,7 @@ use parry3d::{math::Point, query::PointQueryWithLocation};
 use crate::{
     meshgraph::{MeshGraph, Selection},
     ray::FaceIntersection,
-    selectors::MeshSelector,
+    selectors::{MeshSelector, WeightedSelection},
 };
 
 use super::DeformationField;
@@ -34,8 +34,10 @@ impl DeformationField for TranslateDeformation {
         selector: &dyn MeshSelector,
         face_intersection: FaceIntersection,
     ) {
-        (self.selection, self.weight_callback) =
-            selector.select(mesh_graph, face_intersection.point, face_intersection.face);
+        WeightedSelection {
+            selection: self.selection,
+            get_weight: self.weight_callback,
+        } = selector.select(mesh_graph, face_intersection.point, face_intersection.face);
 
         self.point = face_intersection.point;
     }
@@ -56,7 +58,10 @@ impl DeformationField for TranslateDeformation {
             true,
         );
 
-        (self.selection, self.weight_callback) = selector.select(mesh_graph, self.point, face);
+        WeightedSelection {
+            selection: self.selection,
+            get_weight: self.weight_callback,
+        } = selector.select(mesh_graph, self.point, face);
 
         true
     }

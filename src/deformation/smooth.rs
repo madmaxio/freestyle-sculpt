@@ -3,7 +3,7 @@ use glam::Vec3;
 use crate::{
     meshgraph::{MeshGraph, Selection, VertexId},
     ray::FaceIntersection,
-    selectors::MeshSelector,
+    selectors::{MeshSelector, WeightedSelection},
 };
 
 use super::DeformationField;
@@ -31,7 +31,10 @@ impl DeformationField for SmoothDeformation {
         face_intersection: Option<FaceIntersection>,
     ) -> bool {
         if let Some(FaceIntersection { point, face }) = face_intersection {
-            (self.selection, self.weight_callback) = selector.select(mesh_graph, point, face);
+            WeightedSelection {
+                selection: self.selection,
+                get_weight: self.weight_callback,
+            } = selector.select(mesh_graph, point, face);
 
             true
         } else {

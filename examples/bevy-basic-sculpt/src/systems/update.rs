@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use freestyle_sculpt::deformation::SculptParams;
 use freestyle_sculpt::meshgraph::MeshGraph;
 use freestyle_sculpt::ray::Ray;
-use freestyle_sculpt::selectors::SphereWithFalloff;
 
 use crate::resources::*;
 
@@ -17,6 +16,16 @@ pub fn cycle_deformation_mode(
     }
 }
 
+pub fn cycle_selection_mode(
+    mut current_index: ResMut<CurrentSelection>,
+    available_selections: NonSend<AvailableSelections>,
+) {
+    **current_index += 1;
+    if **current_index >= available_selections.len() {
+        **current_index = 0;
+    }
+}
+
 pub fn handle_mouse(
     ray_map: Res<RayMap>,
     buttons: Res<ButtonInput<MouseButton>>,
@@ -24,6 +33,8 @@ pub fn handle_mouse(
     mut meshes: ResMut<Assets<Mesh>>,
     current_deformation: Res<CurrentDeformation>,
     mut available_deformations: NonSendMut<AvailableDeformations>,
+    current_selection: Res<CurrentSelection>,
+    available_selections: NonSend<AvailableSelections>,
     picking_cameras: Query<&Camera>,
     mut mesh_graphs: Query<(&mut MeshGraph, &Mesh3d)>,
     mut prev_point: Local<Vec3>,
@@ -40,7 +51,8 @@ pub fn handle_mouse(
         if !picking_cameras.contains(ray_id.camera) {
             continue;
         };
-        let selector = SphereWithFalloff::new(2.0, 1.0);
+
+        let selector = available_selections.get(**current_selection).unwrap();
 
         let ray = Ray::from(ray);
         let intersection = ray.cast_ray_and_get_face_id(&mesh_graph);
@@ -48,7 +60,7 @@ pub fn handle_mouse(
         if buttons.just_pressed(MouseButton::Left) {
             // Mouse down
             if let Some(intersection) = intersection {
-                deformation_field.on_pointer_down(&mesh_graph, &selector, intersection);
+                deformation_field.on_pointer_down(&mesh_graph, selector.as_ref(), intersection);
 
                 *deformation_active = true;
                 *prev_point = intersection.point;
@@ -74,7 +86,7 @@ pub fn handle_mouse(
 
                     if deformation_field.on_pointer_move(
                         &mesh_graph,
-                        &selector,
+                        selector.as_ref(),
                         mouse_translation,
                         intersection,
                     ) {

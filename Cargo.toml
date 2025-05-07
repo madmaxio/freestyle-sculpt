@@ -7,6 +7,7 @@ edition = "2024"
 anyhow = "1"
 bevy = { version = "0.16.0", optional = true }
 cfg-if = { version = "1.0.0", optional = true }
+derive_more = { version = "2", features = ["deref", "deref_mut"] }
 glam = "0.29"
 hashbrown = "0.15.2"
 itertools = "0.13"

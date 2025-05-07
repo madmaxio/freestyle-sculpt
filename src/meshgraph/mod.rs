@@ -109,11 +109,7 @@ impl MeshGraph {
             graph.vertices[c].outgoing_halfedge = Some(he_c_id);
         }
 
-        println!("Graph created. Building QBVH");
-
         graph.rebuild_qbvh();
-
-        println!("QBVH built");
 
         graph
     }
@@ -208,8 +204,6 @@ impl MeshGraph {
             })
             .collect_vec();
 
-        println!("just before clear_and_rebuild");
-
         self.qbvh.clear_and_rebuild(data.into_iter(), 0.0);
     }
 }
@@ -242,6 +236,30 @@ impl MeshGraph {
             format!("meshgraph/halfedge/{name}"),
             &rerun::Arrows3D::from_vectors([vec3_array(end - start)])
                 .with_origins([vec3_array(start)]),
+        )
+        .unwrap();
+    }
+
+    pub fn log_hes_rerun(&self, name: &str, halfedges: &[HalfedgeId]) {
+        use crate::utils::*;
+        use crate::RR;
+
+        let mut origins = Vec::with_capacity(halfedges.len());
+        let mut vectors = Vec::with_capacity(halfedges.len());
+
+        for &he_id in halfedges {
+            let he = self.halfedges[he_id];
+
+            let start = self.positions[he.start_vertex(self)];
+            let end = self.positions[he.end_vertex];
+
+            origins.push(vec3_array(start));
+            vectors.push(vec3_array(end - start));
+        }
+
+        RR.log(
+            format!("meshgraph/halfedge/{name}"),
+            &rerun::Arrows3D::from_vectors(vectors).with_origins(origins),
         )
         .unwrap();
     }

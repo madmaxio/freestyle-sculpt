@@ -4,21 +4,32 @@ use parry3d::math::{Point, Vector};
 
 use crate::meshgraph::{Face, MeshGraph, Selection, SelectionOps};
 
-use super::{get_sphere_with_falloff_weight_callback, MeshSelector};
+use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
 
-/// Generates a selection on the surface of a mesh that is within a sphere with a falloff and that
-/// is limited to be connected to the input face.
+/// Generates a selection of a mesh that is within a sphere with a falloff
 pub struct SphereWithFalloff {
     /// The radius of the sphere.
     radius: f32,
+
     /// The falloff distance of the sphere. This means that the influence
-    /// decreases linearly from the radius to the radius + falloff.
+    /// decreases from the radius to the radius + falloff.
+    /// The way the influence decreases is controlled by `falloff_func`.
     falloff: f32,
+
+    /// The falloff function used to calculate the weight of the selection.
+    /// It receives values from 0.0 to 1.0 and has to return a value in the same range.
+    /// Simply returning the input value is a linear falloff.
+    falloff_func: fn(f32) -> f32,
 }
 
 impl SphereWithFalloff {
-    pub fn new(radius: f32, falloff: f32) -> Self {
-        Self { radius, falloff }
+    #[inline]
+    pub fn new(radius: f32, falloff: f32, falloff_func: fn(f32) -> f32) -> Self {
+        Self {
+            radius,
+            falloff,
+            falloff_func,
+        }
     }
 }
 
@@ -28,7 +39,7 @@ impl MeshSelector for SphereWithFalloff {
         mesh_graph: &MeshGraph,
         input_pos: Vec3,
         _input_face: Face,
-    ) -> (Selection, Box<dyn Fn(Vec3) -> f32>) {
+    ) -> WeightedSelection {
         let mut selection = Selection::default();
 
         let mut potential_faces = vec![];
@@ -55,9 +66,14 @@ impl MeshSelector for SphereWithFalloff {
             }
         }
 
-        (
+        WeightedSelection {
             selection,
-            get_sphere_with_falloff_weight_callback(input_pos, self.radius, self.falloff),
-        )
+            get_weight: get_sphere_with_falloff_weight_callback(
+                input_pos,
+                self.radius,
+                self.falloff,
+                self.falloff_func,
+            ),
+        }
     }
 }
