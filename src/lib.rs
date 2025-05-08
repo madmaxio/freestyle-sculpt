@@ -2,7 +2,7 @@
 //!
 //! It is based on the paper [Freestyle: Sculpting meshes with self-adaptive topology](https://inria.hal.science/inria-00606516/document) by Lucian Stanculescu, Raphaëlle Chaine, Marie-Paule Cani. This is the same algorithm that is used by the Dyntopo sculpting mode in Blender.
 //!
-//! ![Freestyle Sculpt Demo](https://media.githubusercontent.com/media/Synphonyte/freestyle-sculpt/refs/heads/main/docs/freestyle-demo.webp)
+//! ![Freestyle Sculpt Demo](https://raw.githubusercontent.com/Synphonyte/freestyle-sculpt/refs/heads/main/docs/freestyle-demo.webp)
 //!
 //! Please check out the [bevy-basic-sculpt example](https://github.com/Synphonyte/freestyle-sculpt/tree/main/examples/bevy-basic-sculpt) to see how it can be used in an interactive application.
 //!
@@ -37,7 +37,7 @@ pub mod utils;
 
 #[cfg(feature = "rerun")]
 lazy_static::lazy_static! {
-    pub static ref RR: rerun::RecordingStream = rerun::RecordingStreamBuilder::new("freestyle_s culpt").spawn().unwrap();
+    pub static ref RR: rerun::RecordingStream = rerun::RecordingStreamBuilder::new("freestyle_sculpt").spawn().unwrap();
 }
 
 /// Defines all the necessary parameters for sculpting operations.

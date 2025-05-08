@@ -11,7 +11,7 @@ This is a pure Rust implementation of Freestyle Sculpting, a real-time dynamic t
 
 It is based on the paper [Freestyle: Sculpting meshes with self-adaptive topology](https://inria.hal.science/inria-00606516/document) by Lucian Stanculescu, Raphaëlle Chaine, Marie-Paule Cani. This is the same algorithm that is used by the Dyntopo sculpting mode in Blender.
 
-![Freestyle Sculpt Demo](https://media.githubusercontent.com/media/Synphonyte/freestyle-sculpt/refs/heads/main/docs/freestyle-demo.webp)
+![Freestyle Sculpt Demo](https://raw.githubusercontent.com/Synphonyte/freestyle-sculpt/refs/heads/main/docs/freestyle-demo.webp)
 
 Please check out the [bevy-basic-sculpt example](https://github.com/Synphonyte/freestyle-sculpt/tree/main/examples/bevy-basic-sculpt) to see how it can be used in an interactive application.
 
