@@ -1,11 +1,9 @@
 mod face;
 mod halfedge;
-mod halfedge_loop;
 mod vertex;
 
 pub use face::*;
 pub use halfedge::*;
-pub use halfedge_loop::*;
 pub use vertex::*;
 
 use slotmap::new_key_type;

@@ -44,6 +44,9 @@ impl MeshGraph {
         }
 
         let center_v = self.insert_vertex(center_pos);
+        if let Some(normals) = &mut self.vertex_normals {
+            normals[center_v] = (normals[start_v] + normals[end_v]).normalize();
+        }
 
         let new_he = self.insert_halfedge(end_v);
         self.vertices[center_v].outgoing_halfedge = Some(new_he);

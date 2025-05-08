@@ -1,6 +1,6 @@
 use crate::meshgraph::MeshGraph;
 
-use super::{FaceId, HalfedgeId, HalfedgeLoop, VertexId};
+use super::{FaceId, HalfedgeId, VertexId};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Vertex {
@@ -82,12 +82,11 @@ impl Vertex {
 
     /// Returns the halfedges that are opposite to this vertex for every incident face to this vertex.
     /// They are ordered counterclockwise.
-    pub fn one_ring(&self, mesh_graph: &MeshGraph) -> HalfedgeLoop {
-        HalfedgeLoop::new_unchecked(
-            self.incoming_halfedges(mesh_graph)
-                .into_iter()
-                .rev()
-                .filter_map(|he| mesh_graph.halfedges[he].cw_rotated_neighbour(mesh_graph)),
-        )
+    pub fn one_ring(&self, mesh_graph: &MeshGraph) -> Vec<HalfedgeId> {
+        self.incoming_halfedges(mesh_graph)
+            .into_iter()
+            .rev()
+            .filter_map(|he| mesh_graph.halfedges[he].cw_rotated_neighbour(mesh_graph))
+            .collect()
     }
 }

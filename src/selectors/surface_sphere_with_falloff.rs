@@ -1,6 +1,7 @@
 use glam::Vec3;
+use hashbrown::HashSet;
 
-use crate::meshgraph::{BiggerLoop, Face, MeshGraph, Selection, SelectionOps};
+use crate::meshgraph::{Face, MeshGraph, Selection};
 
 use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
 
@@ -42,42 +43,34 @@ impl MeshSelector for SurfaceSphereWithFalloff {
         let sum = self.radius + self.falloff;
         let max_dist_sqr = sum * sum;
 
-        let mut selection = Selection::default();
+        let mut vertices = HashSet::new();
+        let mut new_vertices = HashSet::new();
 
-        let one_ring = mesh_graph.vertices[mesh_graph.halfedges[input_face.halfedge].end_vertex]
-            .one_ring(mesh_graph);
+        new_vertices.insert(mesh_graph.halfedges[input_face.halfedge].end_vertex);
 
-        let mut potential_loop = BiggerLoop {
-            visited_vertices: one_ring
-                .iter()
-                .map(|he_id| mesh_graph.halfedges[*he_id].end_vertex)
-                .collect(),
-            grown_loop: one_ring,
-        };
+        while !new_vertices.is_empty() {
+            let mut new_new_vertices = HashSet::new();
 
-        selection.insert(input_face.id);
-
-        loop {
-            let mut all_outside = true;
-
-            for v_id in potential_loop.visited_vertices.iter().copied() {
+            for v_id in new_vertices {
                 let pos = mesh_graph.positions[v_id];
 
-                if pos.distance_squared(input_pos) <= max_dist_sqr {
-                    selection.insert(v_id);
-                    all_outside = false;
+                if !vertices.contains(&v_id) && pos.distance_squared(input_pos) <= max_dist_sqr {
+                    vertices.insert(v_id);
+
+                    for he_id in mesh_graph.vertices[v_id].outgoing_halfedges(mesh_graph) {
+                        new_new_vertices.insert(mesh_graph.halfedges[he_id].end_vertex);
+                    }
                 }
             }
 
-            if all_outside {
-                break;
-            }
-
-            potential_loop = potential_loop.grown_loop.bigger_loop(mesh_graph);
+            new_vertices = new_new_vertices;
         }
 
         WeightedSelection {
-            selection,
+            selection: Selection {
+                vertices,
+                ..Default::default()
+            },
             get_weight: get_sphere_with_falloff_weight_callback(
                 input_pos,
                 self.radius,
