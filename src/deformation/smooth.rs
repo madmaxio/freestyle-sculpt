@@ -8,6 +8,10 @@ use crate::{
 
 use super::DeformationField;
 
+/// Smoothing deformation field.
+///
+/// This deformation field applies a smoothing effect to the selected vertices.
+/// It calculates the average position of the surrounding vertices of every selected vertex and moves it towards this average.
 pub struct SmoothDeformation {
     selection: Selection,
     weight_callback: Box<dyn Fn(Vec3) -> f32>,

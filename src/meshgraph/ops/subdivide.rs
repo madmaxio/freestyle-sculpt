@@ -1,9 +1,9 @@
 use hashbrown::{HashMap, HashSet};
 
-use crate::{
-    meshgraph::{HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId},
-    utils::vec3_array,
-};
+use crate::meshgraph::{HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
+
+#[cfg(feature = "rerun")]
+use crate::utils::vec3_array;
 
 impl MeshGraph {
     /// Subdivides an edge by computing it's center vertex. This also subdivides any adjacent triangles and

@@ -9,6 +9,9 @@ use crate::{
 
 use super::DeformationField;
 
+/// Translation deformation field.
+///
+/// This deformation field translates vertices based on the pointer movement.
 pub struct TranslateDeformation {
     selection: Selection,
     weight_callback: Box<dyn Fn(Vec3) -> f32>,

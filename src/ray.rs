@@ -13,10 +13,12 @@ pub struct Ray {
 }
 
 impl Ray {
+    /// Returns the point on the ray `origin + toi * direction`
     pub fn point_at(self, toi: f32) -> Vec3 {
         self.origin + toi * self.direction
     }
 
+    /// Casts the ray and returns the face id and point of the first intersection.
     pub fn cast_ray_and_get_face_id(self, graph: &MeshGraph) -> Option<FaceIntersection> {
         let parry_ray = self.into();
 
@@ -43,6 +45,11 @@ impl From<Ray> for parry3d::query::Ray {
     }
 }
 
+/// Used with pointer-mesh interactions.
+/// - **`point`** is the point on the mesh, that has been clicked or touched.
+///   This is is usually found by ray casting.
+/// - **`face`** is the face on the mesh, that has been clicked or touched.
+///   This is also usually found by ray casting.
 #[derive(Debug, Clone, Copy)]
 pub struct FaceIntersection {
     pub point: Vec3,

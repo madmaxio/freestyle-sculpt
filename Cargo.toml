@@ -1,7 +1,16 @@
 [package]
 name = "freestyle-sculpt"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2024"
+authors = ["Marc-Stefan Cassola"]
+categories = ["graphics", "algorithms", "mathematics"]
+description = "Dyntopo real-time 3D sculpting in Rust"
+exclude = ["examples/", "tests/"]
+keywords = ["3D", "sculpting", "real-time", "mesh", "topology"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Synphonyte/freestyle-sculpt"
+
 
 [dependencies]
 anyhow = "1"
@@ -17,6 +26,6 @@ rerun = { version = "0.22.1", optional = true }
 slotmap = "1.0.7"
 
 [features]
-default = ["rerun", "bevy"]
+default = []
 rerun = ["dep:rerun", "dep:lazy_static", "dep:cfg-if"]
 bevy = ["dep:bevy"]
