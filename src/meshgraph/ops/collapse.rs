@@ -1,7 +1,7 @@
 use hashbrown::{HashMap, HashSet};
 use itertools::Itertools;
 
-use crate::meshgraph::{FaceId, HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
+use mesh_graph::{FaceId, HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
 
 impl MeshGraph {
     /// Collapses edges until all edges have a length above the minimum length.

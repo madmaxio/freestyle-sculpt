@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/freestyle-sculpt.svg)](https://crates.io/crates/freestyle-sculpt)
 [![Docs](https://docs.rs/freestyle-sculpt/badge.svg)](https://docs.rs/freestyle-sculpt/)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/synphonyte/freestyle-sculpt#license)
-[![Build Status](https://github.com/synphonyte/freestyle-sculpt/actions/workflows/ci.yml/badge.svg)](https://github.com/synphonyte/freestyle-sculpt/actions/workflows/ci.yml)
+[![Build Status](https://github.com/synphonyte/freestyle-sculpt/actions/workflows/cd.yml/badge.svg)](https://github.com/synphonyte/freestyle-sculpt/actions/workflows/cd.yml)
 
 <!-- cargo-rdme start -->
 

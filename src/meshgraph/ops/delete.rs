@@ -1,6 +1,6 @@
 use hashbrown::HashSet;
 
-use crate::meshgraph::{FaceId, HalfedgeId, MeshGraph, VertexId};
+use mesh_graph::{FaceId, HalfedgeId, MeshGraph, VertexId};
 
 impl MeshGraph {
     /// Deletes a face from the mesh graph.

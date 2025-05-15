@@ -1,6 +1,6 @@
 use glam::Vec3;
 
-use crate::meshgraph::{Face, MeshGraph, Selection};
+use mesh_graph::{Face, MeshGraph, Selection};
 
 /// Trait for selecting a part of the mesh graph for deformation fields to be applied to.
 pub trait MeshSelector {

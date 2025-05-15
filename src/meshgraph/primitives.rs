@@ -1,7 +1,7 @@
 use glam::{vec3, Vec3};
 use itertools::Itertools;
 
-use crate::meshgraph::MeshGraph;
+use mesh_graph::MeshGraph;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Triangle(pub Vec3, pub Vec3, pub Vec3);

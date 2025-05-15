@@ -2,9 +2,9 @@ use glam::Vec3;
 use hashbrown::HashSet;
 use parry3d::math::{Point, Vector};
 
-use crate::meshgraph::{Face, MeshGraph, Selection, SelectionOps};
+use mesh_graph::{Face, MeshGraph, Selection, SelectionOps};
 
-use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
+use super::{MeshSelector, WeightedSelection, get_sphere_with_falloff_weight_callback};
 
 /// Generates a selection of a mesh that is within a sphere with a falloff
 pub struct SphereWithFalloff {

@@ -25,15 +25,11 @@
 
 ///Deformation fields to do the vertex manipulation
 pub mod deformation;
-pub mod integrations;
-pub mod meshgraph;
+mod integrations;
 /// Ray casting onto mesh graphs
 pub mod ray;
 /// Selection strategies to decide which vertices to deform
 pub mod selectors;
-
-#[cfg(feature = "rerun")]
-pub mod utils;
 
 #[cfg(feature = "rerun")]
 lazy_static::lazy_static! {

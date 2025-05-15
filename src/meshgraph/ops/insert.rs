@@ -1,6 +1,6 @@
 use glam::Vec3;
 
-use crate::meshgraph::{Face, FaceId, Halfedge, HalfedgeId, MeshGraph, Vertex, VertexId};
+use mesh_graph::{Face, FaceId, Halfedge, HalfedgeId, MeshGraph, Vertex, VertexId};
 
 impl MeshGraph {
     /// Inserts a vertex and it's position into the mesh graph.

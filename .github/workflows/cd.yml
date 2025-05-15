@@ -37,7 +37,7 @@ jobs:
       - name: Run tests
         run: cargo test
 
-      - name: Publish crate leptos-bevy-canvas
+      - name: Publish crate freestyle-sculpt
         uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CRATES_TOKEN }}

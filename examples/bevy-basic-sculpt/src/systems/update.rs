@@ -1,8 +1,8 @@
 use bevy::picking::backend::ray::RayMap;
 use bevy::prelude::*;
-use freestyle_sculpt::deformation::SculptParams;
-use freestyle_sculpt::meshgraph::MeshGraph;
 use freestyle_sculpt::ray::Ray;
+use freestyle_sculpt::SculptParams;
+use mesh_graph::MeshGraph;
 
 use crate::resources::*;
 

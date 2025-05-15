@@ -10,8 +10,8 @@ on:
       - "!/**.md"
 
 concurrency:
-    group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
-    cancel-in-progress: true
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
 
 jobs:
   integrity:
@@ -32,7 +32,6 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-          targets: wasm32-unknown-unknown
           components: clippy, rustfmt
 
       - name: Setup Rust Cache

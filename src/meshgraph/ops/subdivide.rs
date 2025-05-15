@@ -1,6 +1,6 @@
 use hashbrown::{HashMap, HashSet};
 
-use crate::meshgraph::{HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
+use mesh_graph::{HalfedgeId, MeshGraph, Selection, SelectionOps, VertexId};
 
 #[cfg(feature = "rerun")]
 use crate::utils::vec3_array;

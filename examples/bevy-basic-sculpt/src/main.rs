@@ -10,9 +10,8 @@ use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use freestyle_sculpt::deformation::*;
-use freestyle_sculpt::selectors::SphereWithFalloff;
-use freestyle_sculpt::selectors::SurfaceSphereWithFalloff;
-use freestyle_sculpt::selectors::SMOOTH_FALLOFF;
+use freestyle_sculpt::selectors::*;
+use freestyle_sculpt::SculptParams;
 
 fn main() {
     App::new()

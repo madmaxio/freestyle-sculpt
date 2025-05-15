@@ -1,10 +1,7 @@
 use glam::Vec3;
+use mesh_graph::{MeshGraph, Selection, VertexId};
 
-use crate::{
-    meshgraph::{MeshGraph, Selection, VertexId},
-    ray::FaceIntersection,
-    selectors::MeshSelector,
-};
+use crate::{ray::FaceIntersection, selectors::MeshSelector};
 
 use crate::SculptParams;
 

@@ -1,4 +1,4 @@
-use crate::meshgraph::MeshGraph;
+use mesh_graph::MeshGraph;
 
 use super::{FaceId, HalfedgeId, VertexId};
 

@@ -13,7 +13,7 @@ use parry3d::{
     shape::{FeatureId, Shape, Triangle, TypedSimdCompositeShape},
 };
 
-use crate::meshgraph::{Face, MeshGraph};
+use mesh_graph::{Face, MeshGraph};
 
 impl PointQuery for MeshGraph {
     #[inline]

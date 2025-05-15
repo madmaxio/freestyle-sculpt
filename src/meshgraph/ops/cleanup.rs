@@ -1,4 +1,4 @@
-use crate::meshgraph::{FaceId, HalfedgeId, MeshGraph, VertexId};
+use mesh_graph::{FaceId, HalfedgeId, MeshGraph, VertexId};
 
 impl MeshGraph {
     /// Test if two faces have at least one halfedge in common.

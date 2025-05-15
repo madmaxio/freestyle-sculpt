@@ -1,9 +1,9 @@
 use glam::Vec3;
 use hashbrown::HashSet;
 
-use crate::meshgraph::{Face, MeshGraph, Selection};
+use mesh_graph::{Face, MeshGraph, Selection};
 
-use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
+use super::{MeshSelector, WeightedSelection, get_sphere_with_falloff_weight_callback};
 
 /// Generates a selection on the surface of a mesh that is within a sphere with a falloff and that
 /// is limited to be connected to the input face.

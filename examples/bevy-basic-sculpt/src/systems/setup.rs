@@ -1,6 +1,6 @@
 use bevy::{color::palettes::css::SILVER, prelude::*};
 use bevy_panorbit_camera::PanOrbitCamera;
-use freestyle_sculpt::meshgraph::{primitives::IcoSphere, MeshGraph};
+use mesh_graph::{primitives::IcoSphere, MeshGraph};
 
 pub fn setup(
     mut commands: Commands,
@@ -43,8 +43,6 @@ fn init_icosphere() -> (Mesh, MeshGraph) {
         subdivisions: 2,
         radius: 3.0,
     });
-
-    mesh_graph.log_rerun();
 
     (mesh_graph.clone().into(), mesh_graph)
 }

@@ -1,10 +1,10 @@
-use glam::{vec3, Vec3};
+use glam::{Vec3, vec3};
 use parry3d::{
     math::{Point, Vector},
     query::{PointQueryWithLocation, RayCast},
 };
 
-use crate::meshgraph::{Face, MeshGraph};
+use mesh_graph::{Face, MeshGraph};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {

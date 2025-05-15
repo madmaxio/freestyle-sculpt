@@ -1,8 +1,8 @@
 use glam::Vec3;
+use mesh_graph::{MeshGraph, Selection};
 use parry3d::{math::Point, query::PointQueryWithLocation};
 
 use crate::{
-    meshgraph::{MeshGraph, Selection},
     ray::FaceIntersection,
     selectors::{MeshSelector, WeightedSelection},
 };
@@ -77,8 +77,8 @@ impl DeformationField for TranslateDeformation {
     #[inline(always)]
     fn vertex_movement(
         &self,
-        _vertex: crate::meshgraph::VertexId,
-        _mesh_graph: &crate::meshgraph::MeshGraph,
+        _vertex: mesh_graph::VertexId,
+        _mesh_graph: &mesh_graph::MeshGraph,
     ) -> glam::Vec3 {
         self.translation
     }
