@@ -1,4 +1,4 @@
-use glam::{vec3, Vec3};
+use glam::{Vec3, vec3};
 use parry3d::{
     math::{Point, Vector},
     query::{PointQueryWithLocation, RayCast},
