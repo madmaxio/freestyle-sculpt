@@ -49,7 +49,7 @@ impl SculptParams {
     /// Creates a new instance of `SculptParams` with the specified maximum edge length.
     ///
     /// All other parameters are calculated based on the maximum edge length.
-    pub fn new(max_edge_length: f32) -> Self {
+    pub const fn new(max_edge_length: f32) -> Self {
         let max_edge_length_squared = max_edge_length * max_edge_length;
 
         Self {

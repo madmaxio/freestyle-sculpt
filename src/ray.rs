@@ -1,4 +1,4 @@
-use glam::{Vec3, vec3};
+use glam::{vec3, Vec3};
 use parry3d::{
     math::{Point, Vector},
     query::{PointQueryWithLocation, RayCast},
@@ -19,20 +19,23 @@ impl Ray {
     }
 
     /// Casts the ray and returns the face id and point of the first intersection.
-    pub fn cast_ray_and_get_face_id(self, graph: &MeshGraph) -> Option<FaceIntersection> {
+    pub fn cast_ray_and_get_face_id(self, mesh_graph: &MeshGraph) -> Option<FaceIntersection> {
         let parry_ray = self.into();
 
-        graph.cast_local_ray(&parry_ray, f32::MAX, true).map(|toi| {
-            let hit_point = parry_ray.point_at(toi);
+        mesh_graph
+            .cast_local_ray(&parry_ray, f32::MAX, true)
+            .map(|toi| {
+                let hit_point = parry_ray.point_at(toi);
 
-            // TODO : implement cast_local_ray_and_get_location so this is not necessary
-            let (_, (face, _)) = graph.project_local_point_and_get_location(&hit_point, true);
+                // TODO : implement cast_local_ray_and_get_location so this is not necessary
+                let (_, (face, _)) =
+                    mesh_graph.project_local_point_and_get_location(&hit_point, true);
 
-            FaceIntersection {
-                point: vec3(hit_point.x, hit_point.y, hit_point.z),
-                face,
-            }
-        })
+                FaceIntersection {
+                    point: vec3(hit_point.x, hit_point.y, hit_point.z),
+                    face,
+                }
+            })
     }
 }
 

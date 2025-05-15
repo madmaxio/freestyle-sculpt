@@ -1,6 +1,6 @@
 use bevy::{color::palettes::css::SILVER, prelude::*};
 use bevy_panorbit_camera::PanOrbitCamera;
-use mesh_graph::{primitives::IcoSphere, MeshGraph};
+use mesh_graph::{MeshGraph, primitives::IcoSphere};
 
 pub fn setup(
     mut commands: Commands,

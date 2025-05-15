@@ -9,9 +9,9 @@ use bevy::input::common_conditions::{input_just_pressed, input_just_released, in
 use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
+use freestyle_sculpt::SculptParams;
 use freestyle_sculpt::deformation::*;
 use freestyle_sculpt::selectors::*;
-use freestyle_sculpt::SculptParams;
 
 fn main() {
     App::new()
