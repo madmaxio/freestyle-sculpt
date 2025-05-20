@@ -4,22 +4,22 @@ use parry3d::math::{Point, Vector};
 
 use mesh_graph::{Face, MeshGraph, Selection, SelectionOps};
 
-use super::{MeshSelector, WeightedSelection, get_sphere_with_falloff_weight_callback};
+use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
 
 /// Generates a selection of a mesh that is within a sphere with a falloff
 pub struct SphereWithFalloff {
     /// The radius of the sphere.
-    radius: f32,
+    pub radius: f32,
 
     /// The falloff distance of the sphere. This means that the influence
     /// decreases from the radius to the radius + falloff.
     /// The way the influence decreases is controlled by `falloff_func`.
-    falloff: f32,
+    pub falloff: f32,
 
     /// The falloff function used to calculate the weight of the selection.
     /// It receives values from 0.0 to 1.0 and has to return a value in the same range.
     /// Simply returning the input value is a linear falloff.
-    falloff_func: fn(f32) -> f32,
+    pub falloff_func: fn(f32) -> f32,
 }
 
 impl SphereWithFalloff {
