@@ -7,6 +7,7 @@ use parry3d::{
 use mesh_graph::{Face, MeshGraph};
 
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ray {
     pub origin: Vec3,
     pub direction: Vec3,

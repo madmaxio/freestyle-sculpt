@@ -3,10 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2025-05-15
+## [0.2.0] - 2025-05-29
 
 - Made selector fields public
 - Updated parry3d to version 0.21
+- Updated mesh-graph to version 0.2
+- Added `from_mesh_graph` constructor to `SculptParams`
+- Added `serde` support
+- Fixed selection handling while sculpting
+- Fixed mouse handling for the translate deformation
 
 ## [0.1.1] - 2025-05-15
 

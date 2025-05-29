@@ -23,6 +23,8 @@
 //! If you want to implement a custom selection strategy, you can create a struct that implements the [`MeshSelector`] trait. Have a look
 //! at the existing selection strategies in the [`selectors`] module for inspiration.
 
+use mesh_graph::MeshGraph;
+
 ///Deformation fields to do the vertex manipulation
 pub mod deformation;
 mod integrations;
@@ -31,18 +33,14 @@ pub mod ray;
 /// Selection strategies to decide which vertices to deform
 pub mod selectors;
 
-#[cfg(feature = "rerun")]
-lazy_static::lazy_static! {
-    pub static ref RR: rerun::RecordingStream = rerun::RecordingStreamBuilder::new("freestyle_sculpt").spawn().unwrap();
-}
-
 /// Defines all the necessary parameters for sculpting operations.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "bevy", derive(bevy::prelude::Resource))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SculptParams {
-    max_move_dist_squared: f32,
-    min_edge_length_squared: f32,
-    max_edge_length_squared: f32,
+    pub max_move_dist_squared: f32,
+    pub min_edge_length_squared: f32,
+    pub max_edge_length_squared: f32,
 }
 
 impl SculptParams {
@@ -57,5 +55,17 @@ impl SculptParams {
             min_edge_length_squared: max_edge_length_squared * 0.24,
             max_edge_length_squared,
         }
+    }
+
+    pub fn from_mesh_graph(mesh_graph: &MeshGraph) -> Self {
+        let mut edge_length = 0.0;
+
+        for he in mesh_graph.halfedges.values() {
+            edge_length += he.length(mesh_graph);
+        }
+
+        edge_length /= mesh_graph.halfedges.len() as f32;
+
+        Self::new(edge_length * 1.5)
     }
 }

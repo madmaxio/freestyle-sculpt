@@ -2,9 +2,12 @@ use glam::Vec3;
 use hashbrown::HashSet;
 use parry3d::math::{Point, Vector};
 
-use mesh_graph::{Face, MeshGraph, Selection, SelectionOps};
+use mesh_graph::{Face, MeshGraph, Selection};
 
-use super::{get_sphere_with_falloff_weight_callback, MeshSelector, WeightedSelection};
+use super::{
+    MeshSelector, WeightedSelection, faces_incident_to_vertices,
+    get_sphere_with_falloff_weight_callback,
+};
 
 /// Generates a selection of a mesh that is within a sphere with a falloff
 pub struct SphereWithFalloff {
@@ -40,7 +43,7 @@ impl MeshSelector for SphereWithFalloff {
         input_pos: Vec3,
         _input_face: Face,
     ) -> WeightedSelection {
-        let mut selection = Selection::default();
+        let mut vertices = HashSet::new();
 
         let mut potential_faces = vec![];
 
@@ -62,12 +65,15 @@ impl MeshSelector for SphereWithFalloff {
             let distance = mesh_graph.positions[vertex_id].distance_squared(input_pos);
 
             if distance <= max_dist_sqr {
-                selection.insert(vertex_id);
+                vertices.insert(vertex_id);
             }
         }
 
         WeightedSelection {
-            selection,
+            selection: Selection {
+                faces: faces_incident_to_vertices(vertices, mesh_graph),
+                ..Default::default()
+            },
             get_weight: get_sphere_with_falloff_weight_callback(
                 input_pos,
                 self.radius,

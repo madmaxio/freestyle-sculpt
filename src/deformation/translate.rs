@@ -42,7 +42,18 @@ impl DeformationField for TranslateDeformation {
             get_weight: self.weight_callback,
         } = selector.select(mesh_graph, face_intersection.point, face_intersection.face);
 
+        #[cfg(feature = "rerun")]
+        mesh_graph.log_selection_rerun("translate/on_pointer_down", &self.selection);
+
         self.point = face_intersection.point;
+
+        #[cfg(feature = "rerun")]
+        mesh_graph::RR
+            .log(
+                "translate/on_pointer_down/self_point",
+                &rerun::Points3D::new([mesh_graph::utils::vec3_array(self.point)]),
+            )
+            .unwrap();
     }
 
     fn on_pointer_move(
@@ -50,21 +61,39 @@ impl DeformationField for TranslateDeformation {
         mesh_graph: &MeshGraph,
         selector: &dyn MeshSelector,
         mouse_translation: Vec3,
-        _face_intersection: Option<FaceIntersection>,
+        face_intersection: Option<FaceIntersection>,
     ) -> bool {
         self.translation = mouse_translation;
 
         self.point += mouse_translation;
 
-        let (_, (face, _)) = mesh_graph.project_local_point_and_get_location(
-            &Point::new(self.point.x, self.point.y, self.point.z),
-            true,
-        );
+        let (face, point) = if let Some(face_intersection) = face_intersection {
+            (face_intersection.face, face_intersection.point)
+        } else {
+            let (_, (face, _)) = mesh_graph.project_local_point_and_get_location(
+                &Point::new(self.point.x, self.point.y, self.point.z),
+                true,
+            );
+
+            (face, self.point)
+        };
 
         WeightedSelection {
             selection: self.selection,
             get_weight: self.weight_callback,
-        } = selector.select(mesh_graph, self.point, face);
+        } = selector.select(mesh_graph, point, face);
+
+        #[cfg(feature = "rerun")]
+        {
+            mesh_graph.log_selection_rerun("translate/on_pointer_move", &self.selection);
+
+            mesh_graph::RR
+                .log(
+                    "translate/on_pointer_move/self_point",
+                    &rerun::Points3D::new([mesh_graph::utils::vec3_array(point)]),
+                )
+                .unwrap();
+        }
 
         true
     }
