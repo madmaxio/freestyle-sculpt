@@ -17,3 +17,8 @@ pub struct WeightedSelection {
     pub selection: Selection,
     pub get_weight: Box<dyn Fn(Vec3) -> f32>,
 }
+
+/// Used to calculate the distance squared between two points to determine the inclusion and weight of a vertex on the selection.
+pub trait DistanceCalculator {
+    fn distance_squared(&self, a: Vec3, b: Vec3) -> f32;
+}

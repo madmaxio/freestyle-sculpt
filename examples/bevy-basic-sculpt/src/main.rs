@@ -28,8 +28,8 @@ fn main() {
         ]))
         .init_resource::<CurrentDeformation>()
         .insert_non_send_resource(AvailableSelections::new(vec![
-            Box::new(SphereWithFalloff::new(1.5, 1.5, SMOOTH_FALLOFF)),
-            Box::new(SurfaceSphereWithFalloff::new(1.5, 1.5, SMOOTH_FALLOFF)),
+            Box::new(MetricWithFalloff::sphere(1.5, 1.5, SMOOTH_FALLOFF)),
+            Box::new(SurfaceMetricWithFalloff::sphere(1.5, 1.5, SMOOTH_FALLOFF)),
         ]))
         .init_resource::<CurrentSelection>()
         .add_plugins((

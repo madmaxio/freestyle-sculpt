@@ -4,13 +4,14 @@ use hashbrown::HashSet;
 use mesh_graph::{Face, MeshGraph, Selection};
 
 use super::{
-    MeshSelector, WeightedSelection, faces_incident_to_vertices,
+    DistanceCalculator, FalloffFn, L2, MeshSelector, WeightedSelection, faces_incident_to_vertices,
     get_sphere_with_falloff_weight_callback,
 };
 
 /// Generates a selection on the surface of a mesh that is within a sphere with a falloff and that
 /// is limited to be connected to the input face.
-pub struct SurfaceSphereWithFalloff {
+#[derive(Debug)]
+pub struct SurfaceMetricWithFalloff<D: DistanceCalculator + Copy + 'static> {
     /// The radius of the sphere.
     pub radius: f32,
 
@@ -19,24 +20,28 @@ pub struct SurfaceSphereWithFalloff {
     /// The way the influence decreases is controlled by `falloff_func`.
     pub falloff: f32,
 
+    /// The metric squared used to calculate the distance between the input position and the vertices.
+    pub metric_squared: D,
+
     /// The falloff function used to calculate the weight of the selection.
     /// It receives values from 0.0 to 1.0 and has to return a value in the same range.
     /// Simply returning the input value is a linear falloff.
-    pub falloff_func: fn(f32) -> f32,
+    pub falloff_func: FalloffFn,
 }
 
-impl SurfaceSphereWithFalloff {
+impl SurfaceMetricWithFalloff<L2> {
     #[inline]
-    pub fn new(radius: f32, falloff: f32, falloff_func: fn(f32) -> f32) -> Self {
+    pub fn sphere(radius: f32, falloff: f32, falloff_func: FalloffFn) -> Self {
         Self {
             radius,
             falloff,
+            metric_squared: L2,
             falloff_func,
         }
     }
 }
 
-impl MeshSelector for SurfaceSphereWithFalloff {
+impl<D: DistanceCalculator + Copy + 'static> MeshSelector for SurfaceMetricWithFalloff<D> {
     fn select(
         &self,
         mesh_graph: &MeshGraph,
@@ -57,7 +62,9 @@ impl MeshSelector for SurfaceSphereWithFalloff {
             for v_id in new_vertices {
                 let pos = mesh_graph.positions[v_id];
 
-                if !vertices.contains(&v_id) && pos.distance_squared(input_pos) <= max_dist_sqr {
+                if !vertices.contains(&v_id)
+                    && self.metric_squared.distance_squared(pos, input_pos) <= max_dist_sqr
+                {
                     vertices.insert(v_id);
 
                     for he_id in mesh_graph.vertices[v_id].outgoing_halfedges(mesh_graph) {
@@ -79,6 +86,7 @@ impl MeshSelector for SurfaceSphereWithFalloff {
                 self.radius,
                 self.falloff,
                 self.falloff_func,
+                self.metric_squared,
             ),
         }
     }

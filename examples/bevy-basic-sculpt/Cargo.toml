@@ -9,4 +9,4 @@ bevy_panorbit_camera = { version = "0.26", features = ["bevy_egui"] }
 # bevy-inspector-egui = "0.28"
 freestyle-sculpt = { path = "../..", features = ["bevy", "rerun"] }
 itertools = "0.14.0"
-mesh-graph = { path = "../../../mesh-graph", features = ["bevy", "rerun"] }
+mesh-graph = { version = "*", features = ["bevy", "rerun"] }

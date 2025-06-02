@@ -1,30 +1,35 @@
-mod sphere_with_falloff;
-mod surface_sphere_with_falloff;
+mod distance;
+mod metric_with_falloff;
+mod surface_metric_with_falloff;
 mod traits;
 
-use hashbrown::HashSet;
-use mesh_graph::{FaceId, MeshGraph, VertexId};
-pub use sphere_with_falloff::*;
-pub use surface_sphere_with_falloff::*;
+pub use distance::*;
+pub use metric_with_falloff::*;
+pub use surface_metric_with_falloff::*;
 pub use traits::*;
 
 use glam::Vec3;
+use hashbrown::HashSet;
+use mesh_graph::{FaceId, MeshGraph, VertexId};
 
-pub const LINEAR_FALLOFF: fn(f32) -> f32 = |x| x;
+pub type FalloffFn = fn(f32) -> f32;
 
-pub const SMOOTH_FALLOFF: fn(f32) -> f32 = |x| {
+pub const LINEAR_FALLOFF: FalloffFn = |x| x;
+
+pub const SMOOTH_FALLOFF: FalloffFn = |x| {
     let x2 = x * x;
     3.0 * x2 - 2.0 * x2 * x
 };
 
-fn get_sphere_with_falloff_weight_callback(
+fn get_sphere_with_falloff_weight_callback<D: DistanceCalculator + Copy + 'static>(
     input_pos: Vec3,
     radius: f32,
     falloff: f32,
-    falloff_func: fn(f32) -> f32,
+    falloff_func: FalloffFn,
+    distance_calculator: D,
 ) -> Box<dyn Fn(Vec3) -> f32> {
     Box::new(move |pos: Vec3| {
-        let distance = pos.distance(input_pos);
+        let distance = distance_calculator.distance_squared(input_pos, pos).sqrt();
         let rf = radius + falloff;
 
         if distance <= radius {

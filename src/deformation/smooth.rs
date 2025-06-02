@@ -56,7 +56,7 @@ impl DeformationField for SmoothDeformation {
         }
 
         movement /= neighbours.len() as f32;
-        movement - mesh_graph.positions[vertex]
+        (movement - mesh_graph.positions[vertex]) * 0.1
     }
 
     #[inline(always)]
