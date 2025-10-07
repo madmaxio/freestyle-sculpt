@@ -1,5 +1,5 @@
 use glam::Vec3;
-use mesh_graph::{error_none, MeshGraph, Selection, VertexId};
+use mesh_graph::{MeshGraph, Selection, VertexId, error_none};
 use tracing::{error, instrument};
 
 use crate::{ray::FaceIntersection, selectors::MeshSelector};
