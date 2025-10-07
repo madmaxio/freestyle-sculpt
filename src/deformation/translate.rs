@@ -69,13 +69,16 @@ impl DeformationField for TranslateDeformation {
 
         let (face, point) = if let Some(face_intersection) = face_intersection {
             (face_intersection.face, face_intersection.point)
-        } else {
-            let (_, (face, _)) = mesh_graph.project_local_point_and_get_location(
+        } else if let Some((_, face)) = mesh_graph
+            .project_local_point_and_get_location_with_max_dist(
                 &Point::new(self.point.x, self.point.y, self.point.z),
                 true,
-            );
-
+                f32::MAX,
+            )
+        {
             (face, self.point)
+        } else {
+            return false;
         };
 
         WeightedSelection {

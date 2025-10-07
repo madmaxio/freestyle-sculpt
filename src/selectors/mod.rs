@@ -6,6 +6,7 @@ mod traits;
 pub use distance::*;
 pub use metric_with_falloff::*;
 pub use surface_metric_with_falloff::*;
+use tracing::{error, instrument};
 pub use traits::*;
 
 use glam::Vec3;
@@ -42,6 +43,7 @@ fn get_sphere_with_falloff_weight_callback<D: DistanceCalculator + Copy + 'stati
     })
 }
 
+#[instrument(skip(vertices, mesh_graph))]
 fn faces_incident_to_vertices(
     vertices: impl IntoIterator<Item = VertexId>,
     mesh_graph: &MeshGraph,
@@ -49,8 +51,12 @@ fn faces_incident_to_vertices(
     let mut faces = HashSet::new();
 
     for vertex_id in vertices {
-        for face in mesh_graph.vertices[vertex_id].faces(mesh_graph) {
-            faces.insert(face);
+        if let Some(vertex) = mesh_graph.vertices.get(vertex_id) {
+            for face in vertex.faces(mesh_graph) {
+                faces.insert(face);
+            }
+        } else {
+            error!("Vertex not found");
         }
     }
 

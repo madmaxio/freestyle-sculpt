@@ -1,5 +1,6 @@
 use glam::Vec3;
-use mesh_graph::{MeshGraph, Selection, VertexId};
+use mesh_graph::{MeshGraph, Selection, VertexId, error_none};
+use tracing::instrument;
 
 use crate::{
     ray::FaceIntersection,
@@ -46,17 +47,33 @@ impl DeformationField for SmoothDeformation {
         }
     }
 
+    #[instrument(skip(self, mesh_graph))]
     fn vertex_movement(&self, vertex: VertexId, mesh_graph: &MeshGraph) -> Vec3 {
         let mut movement = Vec3::ZERO;
 
-        let neighbours = mesh_graph.vertices[vertex].neighbours(mesh_graph);
+        let neighbours = mesh_graph
+            .vertices
+            .get(vertex)
+            .map(|v| v.neighbours(mesh_graph).collect::<Vec<_>>())
+            .or_else(error_none!("Vertex not found"))
+            .unwrap_or_default();
 
         for neighbour in &neighbours {
-            movement += mesh_graph.positions[*neighbour];
+            movement += mesh_graph
+                .positions
+                .get(*neighbour)
+                .or_else(error_none!("Neighbour position not found"))
+                .unwrap_or(&Vec3::ZERO);
         }
 
         movement /= neighbours.len() as f32;
-        (movement - mesh_graph.positions[vertex]) * 0.1
+
+        let pos = mesh_graph
+            .positions
+            .get(vertex)
+            .or_else(error_none!("Vertex position not found"))
+            .unwrap_or(&Vec3::ZERO);
+        (movement - pos) * 0.1
     }
 
     #[inline(always)]

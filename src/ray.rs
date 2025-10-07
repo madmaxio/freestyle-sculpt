@@ -23,20 +23,20 @@ impl Ray {
     pub fn cast_ray_and_get_face_id(self, mesh_graph: &MeshGraph) -> Option<FaceIntersection> {
         let parry_ray = self.into();
 
-        mesh_graph
-            .cast_local_ray(&parry_ray, f32::MAX, true)
-            .map(|toi| {
-                let hit_point = parry_ray.point_at(toi);
+        let toi = mesh_graph.cast_local_ray(&parry_ray, f32::MAX, true)?;
+        let hit_point = parry_ray.point_at(toi);
 
-                // TODO : implement cast_local_ray_and_get_location so this is not necessary
-                let (_, (face, _)) =
-                    mesh_graph.project_local_point_and_get_location(&hit_point, true);
+        // TODO : implement cast_local_ray_and_get_location so this is not necessary
+        let (_, face) = mesh_graph.project_local_point_and_get_location_with_max_dist(
+            &hit_point,
+            true,
+            f32::MAX,
+        )?;
 
-                FaceIntersection {
-                    point: vec3(hit_point.x, hit_point.y, hit_point.z),
-                    face,
-                }
-            })
+        Some(FaceIntersection {
+            point: vec3(hit_point.x, hit_point.y, hit_point.z),
+            face,
+        })
     }
 }
 

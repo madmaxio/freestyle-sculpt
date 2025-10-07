@@ -2,6 +2,7 @@ use glam::Vec3;
 use hashbrown::HashSet;
 
 use mesh_graph::{Face, MeshGraph, Selection};
+use tracing::{error, instrument};
 
 use super::{
     DistanceCalculator, FalloffFn, L2, MeshSelector, WeightedSelection, faces_incident_to_vertices,
@@ -42,6 +43,7 @@ impl SurfaceMetricWithFalloff<L2> {
 }
 
 impl<D: DistanceCalculator + Copy + 'static> MeshSelector for SurfaceMetricWithFalloff<D> {
+    #[instrument(skip(self, mesh_graph))]
     fn select(
         &self,
         mesh_graph: &MeshGraph,
@@ -54,21 +56,47 @@ impl<D: DistanceCalculator + Copy + 'static> MeshSelector for SurfaceMetricWithF
         let mut vertices = HashSet::new();
         let mut new_vertices = HashSet::new();
 
-        new_vertices.insert(mesh_graph.halfedges[input_face.halfedge].end_vertex);
+        if let Some(he) = mesh_graph.halfedges.get(input_face.halfedge) {
+            new_vertices.insert(he.end_vertex);
+        } else {
+            error!("Halfedge not found");
+        }
 
         while !new_vertices.is_empty() {
             let mut new_new_vertices = HashSet::new();
 
             for v_id in new_vertices {
-                let pos = mesh_graph.positions[v_id];
+                let pos = match mesh_graph.positions.get(v_id) {
+                    Some(pos) => *pos,
+                    None => {
+                        error!("Vertex position not found");
+                        continue;
+                    }
+                };
 
                 if !vertices.contains(&v_id)
                     && self.metric_squared.distance_squared(pos, input_pos) <= max_dist_sqr
                 {
+                    let vertex = match mesh_graph.vertices.get(v_id) {
+                        Some(vertex) => vertex,
+                        None => {
+                            error!("Vertex not found");
+                            continue;
+                        }
+                    };
+
                     vertices.insert(v_id);
 
-                    for he_id in mesh_graph.vertices[v_id].outgoing_halfedges(mesh_graph) {
-                        new_new_vertices.insert(mesh_graph.halfedges[he_id].end_vertex);
+                    for he_id in vertex.outgoing_halfedges(mesh_graph) {
+                        let he = match mesh_graph.halfedges.get(he_id) {
+                            Some(he) => he,
+                            None => {
+                                error!("Halfedge not found");
+                                continue;
+                            }
+                        };
+
+                        new_new_vertices.insert(he.end_vertex);
                     }
                 }
             }

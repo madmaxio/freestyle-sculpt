@@ -1,5 +1,6 @@
 use glam::Vec3;
-use mesh_graph::{MeshGraph, Selection, VertexId};
+use mesh_graph::{error_none, MeshGraph, Selection, VertexId};
+use tracing::{error, instrument};
 
 use crate::{ray::FaceIntersection, selectors::MeshSelector};
 
@@ -54,6 +55,7 @@ pub trait DeformationField {
 
     /// This computes the maximum vertex movement of all the affected vertices.
     /// Used to determine the number of steps needed to apply the deformation.
+    #[instrument(skip(self, mesh_graph))]
     fn max_movement_squared(&self, mesh_graph: &MeshGraph, strength: f32) -> f32 {
         let affected_vertices = self.selection().resolve_to_vertices(mesh_graph);
         let get_weight = self.weight_callback();
@@ -61,9 +63,15 @@ pub trait DeformationField {
         let mut max_movement_squared: f32 = 0.0;
 
         for vertex in &affected_vertices {
-            let movement = self.vertex_movement(*vertex, mesh_graph)
-                * get_weight(mesh_graph.positions[*vertex])
-                * strength;
+            let weight = mesh_graph
+                .positions
+                .get(*vertex)
+                .or_else(error_none!("Vertex position not found"))
+                .copied()
+                .map(get_weight)
+                .unwrap_or_default();
+
+            let movement = self.vertex_movement(*vertex, mesh_graph) * weight * strength;
             max_movement_squared = max_movement_squared.max(movement.length_squared());
         }
 
@@ -73,6 +81,7 @@ pub trait DeformationField {
     /// This is the main method of this trait. It applies the deformation to the mesh graph.
     ///
     /// This method should be called after `on_pointer_move` returns `true`.
+    #[instrument(skip(self, mesh_graph))]
     fn apply(&mut self, mesh_graph: &mut MeshGraph, strength: f32, params: SculptParams) {
         let max_movement_squared = self.max_movement_squared(mesh_graph, strength);
 
@@ -103,16 +112,26 @@ pub trait DeformationField {
             let get_weight = self.weight_callback();
 
             for vertex in &affected_vertices {
-                let movement = self.vertex_movement(*vertex, mesh_graph)
-                    * get_weight(mesh_graph.positions[*vertex])
-                    * strength;
+                let weight = mesh_graph
+                    .positions
+                    .get(*vertex)
+                    .or_else(error_none!("Vertex position not found"))
+                    .copied()
+                    .map(get_weight)
+                    .unwrap_or_default();
+
+                let movement = self.vertex_movement(*vertex, mesh_graph) * weight * strength;
                 movements.push(movement);
             }
 
             let selection = self.selection_mut();
 
             for (vertex, movement) in affected_vertices.iter().zip(movements.iter()) {
-                mesh_graph.positions[*vertex] += *movement * factor;
+                if let Some(pos) = mesh_graph.positions.get_mut(*vertex) {
+                    *pos += *movement * factor;
+                } else {
+                    error!("Position not found");
+                }
             }
 
             #[cfg(feature = "rerun")]
@@ -129,6 +148,6 @@ pub trait DeformationField {
             // TODO : merging and separation and cleanup
         }
 
-        mesh_graph.refit_qbvh();
+        mesh_graph.refit_bvh();
     }
 }

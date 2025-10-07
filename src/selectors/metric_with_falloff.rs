@@ -2,7 +2,8 @@ use glam::Vec3;
 use hashbrown::HashSet;
 use parry3d::math::{Point, Vector};
 
-use mesh_graph::{Face, MeshGraph, Selection};
+use mesh_graph::{Face, MeshGraph, Selection, error_none};
+use tracing::{error, instrument};
 
 use super::{
     DistanceCalculator, FalloffFn, L2, MeshSelector, WeightedSelection, faces_incident_to_vertices,
@@ -43,6 +44,7 @@ impl MetricWithFalloff<L2> {
 }
 
 impl<D: DistanceCalculator + Copy + 'static> MeshSelector for MetricWithFalloff<D> {
+    #[instrument(skip(self, mesh_graph))]
     fn select(
         &self,
         mesh_graph: &MeshGraph,
@@ -51,16 +53,20 @@ impl<D: DistanceCalculator + Copy + 'static> MeshSelector for MetricWithFalloff<
     ) -> WeightedSelection {
         let mut vertices = HashSet::new();
 
-        let mut potential_faces = vec![];
-
         let aabb = parry3d::bounding_volume::Aabb::from_half_extents(
             Point::new(input_pos.x, input_pos.y, input_pos.z),
             Vector::from_element(self.radius + self.falloff),
         );
-        mesh_graph.qbvh.intersect_aabb(&aabb, &mut potential_faces);
+        let potential_faces = mesh_graph.bvh.intersect_aabb(&aabb);
 
         let potential_selection = Selection {
-            faces: HashSet::from_iter(potential_faces.into_iter().map(|f| f.id)),
+            faces: HashSet::from_iter(potential_faces.filter_map(|idx| {
+                mesh_graph
+                    .index_to_face_id
+                    .get(idx as usize)
+                    .copied()
+                    .or_else(error_none!("Face not found"))
+            })),
             ..Default::default()
         };
 
@@ -68,12 +74,14 @@ impl<D: DistanceCalculator + Copy + 'static> MeshSelector for MetricWithFalloff<
         let max_dist_sqr = sum * sum;
 
         for vertex_id in potential_selection.resolve_to_vertices(mesh_graph) {
-            let distance = self
-                .metric_squared
-                .distance_squared(mesh_graph.positions[vertex_id], input_pos);
+            if let Some(pos) = mesh_graph.positions.get(vertex_id) {
+                let distance = self.metric_squared.distance_squared(*pos, input_pos);
 
-            if distance <= max_dist_sqr {
-                vertices.insert(vertex_id);
+                if distance <= max_dist_sqr {
+                    vertices.insert(vertex_id);
+                }
+            } else {
+                error!("Position not found");
             }
         }
 
