@@ -1,7 +1,7 @@
 use bevy::picking::backend::ray::RayMap;
 use bevy::prelude::*;
-use freestyle_sculpt::ray::Ray;
 use freestyle_sculpt::SculptParams;
+use freestyle_sculpt::ray::Ray;
 use mesh_graph::MeshGraph;
 
 use crate::resources::*;
@@ -70,7 +70,7 @@ pub fn handle_mouse(
         } else if buttons.just_released(MouseButton::Left) {
             // Mouse up
             if *deformation_active {
-                mesh_graph.rebuild_qbvh();
+                mesh_graph.optimize_bvh_incremental();
 
                 *deformation_active = false;
             }
@@ -102,6 +102,8 @@ pub fn handle_mouse(
 
                     *prev_point = cur_point;
                 }
+
+                mesh_graph.optimize_bvh_incremental();
             }
         }
     }

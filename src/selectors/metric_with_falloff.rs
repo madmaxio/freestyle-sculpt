@@ -63,7 +63,7 @@ impl<D: DistanceCalculator + Copy + 'static> MeshSelector for MetricWithFalloff<
             faces: HashSet::from_iter(potential_faces.filter_map(|idx| {
                 mesh_graph
                     .index_to_face_id
-                    .get(idx as usize)
+                    .get(&idx)
                     .copied()
                     .or_else(error_none!("Face not found"))
             })),
